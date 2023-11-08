@@ -15,8 +15,10 @@ const createUser = async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
-
-    const nameValidationMessage = validateName(name);
+    const existingUserName = await userModel.findOne({ name });
+    const existingUserEmail = await userModel.findOne({ email });
+    if(existingUserName== null && existingUserEmail==null){
+      const nameValidationMessage = validateName(name);
     if (nameValidationMessage !== "Name is valid") {
       return res.status(400).json({ error: nameValidationMessage });
     }
@@ -45,7 +47,13 @@ const createUser = async (req, res) => {
     return res
       .status(201)
       .json({ message: "User created successfully", newUser });
-  } catch (error) {
+    }
+    else{
+      return res
+      .status(201)
+      .json({ message: "User already exists"});
+    }
+    } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -114,7 +122,7 @@ function validateName(name) {
   if (name.length > 20) {
     return "Name can't exceed 20 characters";
   }
-  const alphabeticPattern = /^[A-Z]+$/i;
+  const alphabeticPattern = /^[a-zA-Z ]*$/;;
   if (!alphabeticPattern.test(name)) {
     return "Name should contain only alphabetic characters";
   }
