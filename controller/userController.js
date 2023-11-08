@@ -61,14 +61,13 @@ const createUser = async (req, res) => {
 
 
 const updateUser = async (req, res) => {
-  const { name, password } = req.body;
-  const userId = req.params.id;
+  const { name, email, password } = req.body;
 
   try {
-    const user = await userModel.findById(userId);
+    const user = await userModel.findOne({email});
 
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res.status(404).json({ error: "User email address not found" });
     }
 
     const nameValidationMessage = validateName(name);
@@ -122,7 +121,7 @@ function validateName(name) {
   if (name.length > 20) {
     return "Name can't exceed 20 characters";
   }
-  const alphabeticPattern = /^[a-zA-Z ]*$/;;
+  const alphabeticPattern = /^[a-zA-Z ]*$/;
   if (!alphabeticPattern.test(name)) {
     return "Name should contain only alphabetic characters";
   }
